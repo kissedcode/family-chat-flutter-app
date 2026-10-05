@@ -1,0 +1,43 @@
+{
+  "@@locale": "ru",
+  "appTitle": "Fassenger",
+  "authTitle": "Fassenger",
+  "authEmail": "Email",
+  "authPassword": "Пароль",
+  "authName": "Ваше имя",
+  "authSignIn": "Войти",
+  "authSignUp": "Зарегистрироваться",
+  "authSignInWithGoogle": "Войти через Google",
+  "authForgotPassword": "Забыли пароль?",
+  "authSwitchToSignUp": "Нет аккаунта? Зарегистрироваться",
+  "authSwitchToSignIn": "Уже есть аккаунт? Войти",
+  "authErrorGeneric": "Не удалось войти. Попробуйте ещё раз.",
+  "authResetPasswordSent": "Ссылка на сброс пароля отправлена",
+  "authResetPasswordDialogTitle": "Сброс пароля",
+  "authResetPasswordDialogHint": "Введите email",
+  "authCancel": "Отмена",
+  "authOk": "OK",
+  "chatTitle": "Семейный чат",
+  "chatMessageHint": "Сообщение",
+  "chatSendError": "Не удалось отправить сообщение",
+  "chatLengthCounter": "{current}/{max}",
+  "@chatLengthCounter": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "max": { "type": "int" }
+    }
+  },
+  "chatLogOut": "Выйти",
+  "chatEmpty": "Пока нет сообщений. Напишите первое",
+  "chatMessageSending": "отправляется",
+  "chatMessageFailed": "не отправлено",
+  "settingsTitle": "Настройки",
+  "settingsNameLabel": "Имя",
+  "settingsSaveName": "Сохранить имя",
+  "settingsChangeAvatar": "Изменить аватар",
+  "settingsRemoveAvatar": "Удалить",
+  "settingsRemoveAvatarTitle": "Удалить аватар?",
+  "settingsRemoveAvatarConfirm": "Аватар будет удалён. Изменение сразу отразится в чате.",
+  "settingsSaved": "Сохранено",
+  "settingsSaveError": "Не удалось сохранить"
+}

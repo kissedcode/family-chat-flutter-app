@@ -1,0 +1,51 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Whitelist семьи хранится в документе config/access (поле emails: string[]).
+    // Клиенты этот документ не читают — его правит только админ (Console/CLI).
+    function isFamily() {
+      return request.auth != null
+        && request.auth.token.email in
+           get(/databases/$(database)/documents/config/access).data.emails;
+    }
+
+    match /messages/{messageId} {
+      allow read: if isFamily();
+
+      allow create: if isFamily()
+        && request.resource.data.senderId == request.auth.uid
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 4096
+        && request.resource.data.senderName is string
+        && request.resource.data.createdAt == request.time;
+
+      // В v1 редактирование и удаление запрещены.
+      allow update, delete: if false;
+    }
+
+    match /users/{uid} {
+      allow read: if isFamily();
+
+      allow write: if isFamily()
+        && request.auth.uid == uid
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() > 0
+        && request.resource.data.displayName.size() <= 64
+        && (
+          !('avatarUrl' in request.resource.data)
+          || request.resource.data.avatarUrl == null
+          || request.resource.data.avatarUrl is string
+        )
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.updatedAt == request.time;
+    }
+
+    // Всё остальное — запрещено по умолчанию.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

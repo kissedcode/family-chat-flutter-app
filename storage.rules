@@ -1,0 +1,27 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Whitelist читается из Firestore: config/access.emails (cross-service rules).
+    function isFamilyStorage() {
+      return request.auth != null
+        && request.auth.token.email in
+           firestore.get(/databases/(default)/documents/config/access).data.emails;
+    }
+
+    // Аватары: читает любой из whitelist,
+    // пишет — только в свой файл, до 5 МБ, image/*.
+    match /avatars/{uid}/{fileName} {
+      allow read: if isFamilyStorage();
+      allow write: if isFamilyStorage()
+        && request.auth.uid == uid
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
