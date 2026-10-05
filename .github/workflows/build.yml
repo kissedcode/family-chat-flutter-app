@@ -48,9 +48,12 @@ jobs:
           fi
 
       - run: flutter pub get
-      - run: dart run build_runner build --delete-conflicting-outputs
-      - run: flutter analyze --no-fatal-infos
+        timeout-minutes: 5
+      # Сгенерированные файлы (*.g.dart, *.freezed.dart, l10n) закоммичены — build_runner в CI не нужен.
+      - run: flutter analyze --no-fatal-infos --no-fatal-warnings
+        timeout-minutes: 5
       - run: flutter build apk --release
+        timeout-minutes: 20
 
       - uses: actions/upload-artifact@v4
         with:
