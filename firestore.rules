@@ -11,21 +11,62 @@ service cloud.firestore {
            get(/databases/$(database)/documents/config/access).data.emails;
     }
 
-    match /messages/{messageId} {
-      allow read: if isFamily();
-
-      allow create: if isFamily()
-        && request.resource.data.senderId == request.auth.uid
+    // Валидация нового сообщения (общая для общего и личных чатов).
+    function isValidNewMessage() {
+      return request.resource.data.senderId == request.auth.uid
         && request.resource.data.text is string
         && request.resource.data.text.size() > 0
         && request.resource.data.text.size() <= 4096
         && request.resource.data.senderName is string
         && request.resource.data.createdAt == request.time;
+    }
 
-      // В v1 редактирование и удаление запрещены.
+    // Личный чат: id = "<uidA>_<uidB>", uidA < uidB. Участник — тот, чей uid в id.
+    // Проверка по id (а не по resource) работает и для ещё не созданного документа.
+    function isDirectMember(chatId) {
+      return request.auth.uid in chatId.split('_');
+    }
+
+    // ── Общий чат ───────────────────────────────────────────────
+    match /messages/{messageId} {
+      allow read: if isFamily();
+      allow create: if isFamily() && isValidNewMessage();
       allow update, delete: if false;
     }
 
+    // ── Личные чаты ─────────────────────────────────────────────
+    match /chats/{chatId} {
+      // get — по id (работает и для несуществующего чата);
+      // list — по members (запрос where members array-contains myUid).
+      allow get: if isFamily() && isDirectMember(chatId);
+      allow list: if isFamily() && request.auth.uid in resource.data.members;
+
+      allow create: if isFamily()
+        && request.resource.data.keys().hasOnly(['members', 'createdAt', 'lastMessage'])
+        && request.resource.data.members is list
+        && request.resource.data.members.size() == 2
+        && request.resource.data.members[0] < request.resource.data.members[1]
+        && chatId == request.resource.data.members[0] + '_' + request.resource.data.members[1]
+        && request.auth.uid in request.resource.data.members
+        && request.resource.data.createdAt == request.time;
+
+      // Обновлять можно только lastMessage, и только своим сообщением.
+      allow update: if isFamily()
+        && isDirectMember(chatId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastMessage'])
+        && request.resource.data.lastMessage.senderId == request.auth.uid
+        && request.resource.data.lastMessage.createdAt == request.time;
+
+      allow delete: if false;
+
+      match /messages/{messageId} {
+        allow read: if isFamily() && isDirectMember(chatId);
+        allow create: if isFamily() && isDirectMember(chatId) && isValidNewMessage();
+        allow update, delete: if false;
+      }
+    }
+
+    // ── Профили ─────────────────────────────────────────────────
     match /users/{uid} {
       allow read: if isFamily();
 
@@ -41,6 +82,15 @@ service cloud.firestore {
         )
         && request.resource.data.email == request.auth.token.email
         && request.resource.data.updatedAt == request.time;
+
+      // Отметки «прочитано до» — только свои.
+      match /reads/{chatId} {
+        allow read: if isFamily() && request.auth.uid == uid;
+        allow write: if isFamily()
+          && request.auth.uid == uid
+          && request.resource.data.keys().hasOnly(['lastReadAt'])
+          && request.resource.data.lastReadAt == request.time;
+      }
     }
 
     // Всё остальное — запрещено по умолчанию.

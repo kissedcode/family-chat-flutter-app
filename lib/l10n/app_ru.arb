@@ -17,14 +17,17 @@
   "authResetPasswordDialogHint": "Введите email",
   "authCancel": "Отмена",
   "authOk": "OK",
-  "chatTitle": "Семейный чат",
   "chatMessageHint": "Сообщение",
   "chatSendError": "Не удалось отправить сообщение",
   "chatLengthCounter": "{current}/{max}",
   "@chatLengthCounter": {
     "placeholders": {
-      "current": { "type": "int" },
-      "max": { "type": "int" }
+      "current": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
     }
   },
   "chatLogOut": "Выйти",
@@ -39,5 +42,13 @@
   "settingsRemoveAvatarTitle": "Удалить аватар?",
   "settingsRemoveAvatarConfirm": "Аватар будет удалён. Изменение сразу отразится в чате.",
   "settingsSaved": "Сохранено",
-  "settingsSaveError": "Не удалось сохранить"
+  "settingsSaveError": "Не удалось сохранить",
+  "chatListTitle": "Чаты",
+  "chatGeneralTitle": "Семейный чат",
+  "chatListNoMessages": "Нет сообщений",
+  "chatListYouPrefix": "Вы: ",
+  "chatListNewChat": "Новый чат",
+  "newChatTitle": "Новый чат",
+  "newChatEmpty": "Пока никого нет. Родственники появятся здесь после первого входа в приложение",
+  "unreadOverflow": "99+"
 }

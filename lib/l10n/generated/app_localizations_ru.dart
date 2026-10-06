@@ -60,9 +60,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get authOk => 'OK';
 
   @override
-  String get chatTitle => 'Семейный чат';
-
-  @override
   String get chatMessageHint => 'Сообщение';
 
   @override
@@ -112,4 +109,29 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsSaveError => 'Не удалось сохранить';
+
+  @override
+  String get chatListTitle => 'Чаты';
+
+  @override
+  String get chatGeneralTitle => 'Семейный чат';
+
+  @override
+  String get chatListNoMessages => 'Нет сообщений';
+
+  @override
+  String get chatListYouPrefix => 'Вы: ';
+
+  @override
+  String get chatListNewChat => 'Новый чат';
+
+  @override
+  String get newChatTitle => 'Новый чат';
+
+  @override
+  String get newChatEmpty =>
+      'Пока никого нет. Родственники появятся здесь после первого входа в приложение';
+
+  @override
+  String get unreadOverflow => '99+';
 }

@@ -60,9 +60,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get authOk => 'OK';
 
   @override
-  String get chatTitle => 'Family chat';
-
-  @override
   String get chatMessageHint => 'Message';
 
   @override
@@ -112,4 +109,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsSaveError => 'Could not save';
+
+  @override
+  String get chatListTitle => 'Chats';
+
+  @override
+  String get chatGeneralTitle => 'Family chat';
+
+  @override
+  String get chatListNoMessages => 'No messages';
+
+  @override
+  String get chatListYouPrefix => 'You: ';
+
+  @override
+  String get chatListNewChat => 'New chat';
+
+  @override
+  String get newChatTitle => 'New chat';
+
+  @override
+  String get newChatEmpty =>
+      'Nobody here yet. Relatives will appear after they first sign in';
+
+  @override
+  String get unreadOverflow => '99+';
 }
