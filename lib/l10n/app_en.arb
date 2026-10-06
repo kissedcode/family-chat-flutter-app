@@ -17,7 +17,6 @@
   "authResetPasswordDialogHint": "Enter email",
   "authCancel": "Cancel",
   "authOk": "OK",
-  "chatTitle": "Family chat",
   "chatMessageHint": "Message",
   "chatSendError": "Could not send message",
   "chatLengthCounter": "{current}/{max}",
@@ -33,5 +32,13 @@
   "settingsRemoveAvatarTitle": "Remove avatar?",
   "settingsRemoveAvatarConfirm": "The avatar will be removed. The change appears in chat immediately.",
   "settingsSaved": "Saved",
-  "settingsSaveError": "Could not save"
+  "settingsSaveError": "Could not save",
+  "chatListTitle": "Chats",
+  "chatGeneralTitle": "Family chat",
+  "chatListNoMessages": "No messages",
+  "chatListYouPrefix": "You: ",
+  "chatListNewChat": "New chat",
+  "newChatTitle": "New chat",
+  "newChatEmpty": "Nobody here yet. Relatives will appear after they first sign in",
+  "unreadOverflow": "99+"
 }

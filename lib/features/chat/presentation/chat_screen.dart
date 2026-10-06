@@ -1,21 +1,23 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/router.dart';
 import '../../../l10n/generated/app_localizations.dart';
-import '../../auth/presentation/auth_controller.dart';
 import '../../profile/data/user_repository.dart';
 import '../../profile/presentation/avatar.dart';
 import '../data/chat_repository.dart';
+import '../domain/direct_chat.dart';
 import '../domain/message.dart';
 import 'chat_controller.dart';
 
-/// Экран `/`: общий семейный чат.
+/// Экран `/chat/:chatId`: общий (`general`) или личный чат.
 class ChatScreen extends ConsumerStatefulWidget {
-  const ChatScreen({super.key});
+  const ChatScreen({super.key, required this.chatId});
+
+  final String chatId;
 
   @override
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
@@ -23,31 +25,58 @@ class ChatScreen extends ConsumerStatefulWidget {
 
 class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _textCtrl = TextEditingController();
+  late final ChatRepository _repo;
+  Timer? _readTimer;
+  DateTime _lastReadMark = DateTime.fromMillisecondsSinceEpoch(0);
+
+  static const _readThrottle = Duration(seconds: 2);
+
+  bool get _isGeneral => widget.chatId == kGeneralChatId;
 
   @override
   void initState() {
     super.initState();
+    _repo = ref.read(chatRepositoryProvider);
     _textCtrl.addListener(() => setState(() {}));
-    // При открытии чата — гарантируем, что документ users/{uid} создан.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(userRepositoryProvider).ensureMyProfile().catchError((_) {});
-    });
+    _markReadNow();
   }
 
   @override
   void dispose() {
+    _readTimer?.cancel();
+    _markReadNow();
     _textCtrl.dispose();
     super.dispose();
+  }
+
+  void _markReadNow() {
+    _lastReadMark = DateTime.now();
+    _repo.markRead(widget.chatId).catchError((_) {});
+  }
+
+  /// Отметка прочтения не чаще раза в [_readThrottle] (trailing).
+  void _scheduleMarkRead() {
+    final since = DateTime.now().difference(_lastReadMark);
+    if (since >= _readThrottle) {
+      _markReadNow();
+      return;
+    }
+    _readTimer?.cancel();
+    _readTimer = Timer(_readThrottle - since, _markReadNow);
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final messagesAsync = ref.watch(messagesStreamProvider);
-    final sendState = ref.watch(chatControllerProvider);
+    final messagesAsync = ref.watch(messagesStreamProvider(widget.chatId));
+    final sendState = ref.watch(chatControllerProvider(widget.chatId));
     final me = FirebaseAuth.instance.currentUser?.uid;
 
-    ref.listen(chatControllerProvider, (previous, next) {
+    ref.listen(messagesStreamProvider(widget.chatId), (previous, next) {
+      if (next.hasValue) _scheduleMarkRead();
+    });
+
+    ref.listen(chatControllerProvider(widget.chatId), (previous, next) {
       if (next.hasError && !next.isLoading) {
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
@@ -62,20 +91,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.chatTitle),
-        actions: [
-          IconButton(
-            tooltip: l10n.settingsTitle,
-            icon: const Icon(Icons.settings),
-            onPressed: () => context.push(AppRoutes.settings),
-          ),
-          IconButton(
-            tooltip: l10n.chatLogOut,
-            icon: const Icon(Icons.logout),
-            onPressed: () =>
-                ref.read(authControllerProvider.notifier).signOut(),
-          ),
-        ],
+        title: _isGeneral
+            ? Text(l10n.chatGeneralTitle)
+            : _DirectChatTitle(chatId: widget.chatId, myUid: me ?? ''),
       ),
       body: Column(
         children: [
@@ -97,6 +115,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     return _MessageRow(
                       message: msg,
                       isMine: me != null && msg.senderId == me,
+                      showSenderName: _isGeneral,
                     );
                   },
                 );
@@ -171,17 +190,47 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   Future<void> _send() async {
     final text = _textCtrl.text;
     _textCtrl.clear();
-    await ref.read(chatControllerProvider.notifier).sendMessage(text);
+    await ref
+        .read(chatControllerProvider(widget.chatId).notifier)
+        .sendMessage(text);
+  }
+}
+
+/// Заголовок личного чата: аватар и имя собеседника.
+class _DirectChatTitle extends ConsumerWidget {
+  const _DirectChatTitle({required this.chatId, required this.myUid});
+
+  final String chatId;
+  final String myUid;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final otherUid = otherMemberOf(chatId, myUid);
+    if (otherUid == null) return const SizedBox.shrink();
+    final other = ref.watch(userProfileProvider(otherUid)).value;
+    final name = other?.displayName ?? '…';
+    return Row(
+      children: [
+        UserAvatar(avatarUrl: other?.avatarUrl, name: name, radius: 16),
+        const SizedBox(width: 10),
+        Flexible(child: Text(name, overflow: TextOverflow.ellipsis)),
+      ],
+    );
   }
 }
 
 /// Строка чата: аватар + bubble. Аватар слева для чужих сообщений,
 /// справа для своих.
 class _MessageRow extends ConsumerWidget {
-  const _MessageRow({required this.message, required this.isMine});
+  const _MessageRow({
+    required this.message,
+    required this.isMine,
+    required this.showSenderName,
+  });
 
   final Message message;
   final bool isMine;
+  final bool showSenderName;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -214,7 +263,13 @@ class _MessageRow extends ConsumerWidget {
             avatar,
             const SizedBox(width: 6),
           ],
-          Flexible(child: _MessageBubble(message: message, isMine: isMine)),
+          Flexible(
+            child: _MessageBubble(
+              message: message,
+              isMine: isMine,
+              showSenderName: showSenderName,
+            ),
+          ),
           if (isMine) ...[
             const SizedBox(width: 6),
             avatar,
@@ -226,10 +281,15 @@ class _MessageRow extends ConsumerWidget {
 }
 
 class _MessageBubble extends StatelessWidget {
-  const _MessageBubble({required this.message, required this.isMine});
+  const _MessageBubble({
+    required this.message,
+    required this.isMine,
+    required this.showSenderName,
+  });
 
   final Message message;
   final bool isMine;
+  final bool showSenderName;
 
   @override
   Widget build(BuildContext context) {
@@ -260,7 +320,7 @@ class _MessageBubble extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (!isMine)
+            if (!isMine && showSenderName)
               Padding(
                 padding: const EdgeInsets.only(bottom: 2),
                 child: Text(
