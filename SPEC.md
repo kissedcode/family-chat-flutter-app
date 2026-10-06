@@ -647,12 +647,14 @@ Redirect logic (в `core/router.dart`):
 - **macOS signing:** development-сертификат `Apple Development` (личный Apple ID), personal team `4WG9VZ2A3N`, provisioning profile `5b0fd10d-...`; entitlement `keychain-access-groups` = `4WG9VZ2A3N.dev.za9c.fassenger` + `4WG9VZ2A3N.com.google.GIDSignIn`.
 - **Web client ID (Google Sign-In serverClientId):** `847260960210-uajtht6usumegae19qhceij7glun9hhi.apps.googleusercontent.com`.
 - **iOS/macOS CLIENT_ID:** `847260960210-u6svmd9gjaite4cvbiqt1ok65d2806i0.apps.googleusercontent.com` (REVERSED в URL scheme Info.plist).
-- **Firestore rules:** задеплоены (whitelist из `config/access` в `isFamily()`). Личные чаты — в v0.3.0 (в разработке).
+- **Firestore rules:** задеплоены (whitelist из `config/access` в `isFamily()`). Включают личные чаты (`chats/**`) и отметки прочтения (`users/*/reads/*`); проверены в эмуляторе (20 кейсов доступа).
+- **Firestore indexes:** `chats (members CONTAINS, lastMessage.createdAt DESC)` — READY.
 - **Storage rules:** задеплоены (whitelist из `config/access` в `isFamilyStorage()`, `avatars/{uid}/{fileName}` ≤ 5 МБ image/*).
 - **Whitelist:** 5 email'ов в `config/access` (Firestore).
 - **Firebase App Distribution:** 6 тестеров, раздача через `--testers` (группы нет). Один из тестеров может ставить APK, но не в whitelist — читать/писать чат не может.
 - **Releases (Android, Firebase App Distribution):**
-  - v0.2.1(3) — `10iueje1n379o`, 2026-10-06 — новая иконка приложения. Раздан всем 6 тестерам. **Текущий.**
+  - v0.3.0(4) — 2026-10-06 — список чатов, личные чаты 1-на-1, счётчики непрочитанных. Раздан всем 6 тестерам. **Текущий.**
+  - v0.2.1(3) — `10iueje1n379o`, 2026-10-06 — новая иконка приложения.
   - v0.2.0(2) — `371otvjq09kjo`, 2026-10-05 — профиль: имя + аватар.
   - v0.1.0(1) — `7ervu48hfbia0` — первый релиз, общий чат.
 - **macOS:** собирается локально, не распространяется.
