@@ -200,12 +200,6 @@ abstract class AppLocalizations {
   /// **'OK'**
   String get authOk;
 
-  /// No description provided for @chatTitle.
-  ///
-  /// In ru, this message translates to:
-  /// **'Семейный чат'**
-  String get chatTitle;
-
   /// No description provided for @chatMessageHint.
   ///
   /// In ru, this message translates to:
@@ -301,6 +295,54 @@ abstract class AppLocalizations {
   /// In ru, this message translates to:
   /// **'Не удалось сохранить'**
   String get settingsSaveError;
+
+  /// No description provided for @chatListTitle.
+  ///
+  /// In ru, this message translates to:
+  /// **'Чаты'**
+  String get chatListTitle;
+
+  /// No description provided for @chatGeneralTitle.
+  ///
+  /// In ru, this message translates to:
+  /// **'Семейный чат'**
+  String get chatGeneralTitle;
+
+  /// No description provided for @chatListNoMessages.
+  ///
+  /// In ru, this message translates to:
+  /// **'Нет сообщений'**
+  String get chatListNoMessages;
+
+  /// No description provided for @chatListYouPrefix.
+  ///
+  /// In ru, this message translates to:
+  /// **'Вы: '**
+  String get chatListYouPrefix;
+
+  /// No description provided for @chatListNewChat.
+  ///
+  /// In ru, this message translates to:
+  /// **'Новый чат'**
+  String get chatListNewChat;
+
+  /// No description provided for @newChatTitle.
+  ///
+  /// In ru, this message translates to:
+  /// **'Новый чат'**
+  String get newChatTitle;
+
+  /// No description provided for @newChatEmpty.
+  ///
+  /// In ru, this message translates to:
+  /// **'Пока никого нет. Родственники появятся здесь после первого входа в приложение'**
+  String get newChatEmpty;
+
+  /// No description provided for @unreadOverflow.
+  ///
+  /// In ru, this message translates to:
+  /// **'99+'**
+  String get unreadOverflow;
 }
 
 class _AppLocalizationsDelegate
