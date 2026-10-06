@@ -1,6 +1,6 @@
 # Fassenger — Спецификация
 
-Версия документа: 2026-10-05
+Версия документа: 2026-10-06
 Текущая инсталляция: bundle `dev.za9c.fassenger` · Firebase project `fassenger-62009` · платформы: Android, macOS
 Назначение: Приватный семейный мессенджер на ~20 родственников — один общий текстовый чат с профилями (имя + аватар), устойчивый к нестабильному интернету. Бэкенд на Firebase.
 
@@ -169,6 +169,11 @@ Snackbar при ошибке: "Не удалось сохранить"
 - **iOS:** `dev.za9c.fassenger` (Firebase iOS app и signing существуют, но платформа в v1 не заводится/не собирается)
 - **Web:** не применимо в v1
 - **Windows/Linux:** не применимо
+
+### Детали: Иконка приложения
+
+- Исходники: `assets/icon/icon.png` (1024×1024, белый символ «облачко-сообщение с домиком и сердцем» на коралловом фоне `#E85D4A`) и `assets/icon/icon_foreground.png` (символ на прозрачном фоне, ~50% площади — safe zone adaptive icon).
+- Генерация: `dart run flutter_launcher_icons` (конфиг — секция `flutter_launcher_icons` в `pubspec.yaml`): Android legacy + adaptive (`adaptive_icon_background: #E85D4A`), macOS AppIcon.
 
 ### Детали: Модель данных Firestore
 
@@ -446,5 +451,5 @@ Redirect logic (в `core/router.dart`):
 - **Storage rules:** задеплоены (whitelist из `config/access` в `isFamilyStorage()`, `avatars/{uid}/{fileName}` ≤ 5 МБ image/*).
 - **Whitelist:** 5 email'ов в `config/access` (Firestore).
 - **Firebase App Distribution:** 6 тестеров, раздача через `--testers` (группы нет). Один из тестеров может ставить APK, но не в whitelist — читать/писать чат не может.
-- **Последний release:** v0.2.0(2) — `371otvjq09kjo` (профиль: имя + аватар), 2026-10-05, раздан всем 6 тестерам.
+- **Последний release:** v0.2.1(3) — новая иконка приложения, 2026-10-06, раздан всем 6 тестерам. Предыдущий: v0.2.0(2) — `371otvjq09kjo` (профиль: имя + аватар).
 - **Репозиторий:** публичный; CI — GitHub Actions (`.github/workflows/build.yml`): Android APK на каждый push/PR в `main`, артефакт в run'е.
